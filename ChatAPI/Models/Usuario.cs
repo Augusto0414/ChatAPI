@@ -7,6 +7,16 @@ namespace ChatAPI.Models
 {
     public class Usuario
     {
+        public Usuario(string name, string email, string password)
+        {
+            Name = name;
+            Email = email;
+            Password = password;
+        }
+        public Usuario() {
+        
+        }
+
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)] 
         public string Id { get; set; }
