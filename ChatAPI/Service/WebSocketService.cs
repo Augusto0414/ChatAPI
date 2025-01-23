@@ -1,6 +1,7 @@
 ﻿using ChatAPI.Interfaces;
 using ChatAPI.Models;
 using System.Net.WebSockets;
+using System.Security.Claims;
 using System.Text;
 
 namespace ChatAPI.Service
@@ -14,10 +15,16 @@ namespace ChatAPI.Service
         {
             _message = message;
         }
-        public async Task ConnectUser(string userID, WebSocket socket)
+        public async Task ConnectUser(HttpContext context, WebSocket socket)
         {
-            _connectedUsers[userID] = socket;
-            await ReceiveMessagesAsync(userID, socket);
+            var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId != null)
+            {
+                _connectedUsers[userId] = socket;
+
+                await ReceiveMessagesAsync(userId, socket);
+            }
         }
 
         public async Task SendMessageToReceiverAsync(Mensaje message)
