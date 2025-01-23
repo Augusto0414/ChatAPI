@@ -14,42 +14,37 @@ namespace ChatAPI.Service
         {
             _message = message;
         }
-        public async Task ConnectUser(string userName, WebSocket socket) 
+        public async Task ConnectUser(string userID, WebSocket socket)
         {
-            _connectedUsers[userName] = socket;
-            await ReceiveMessagesAsync(userName ,socket);
+            _connectedUsers[userID] = socket;
+            await ReceiveMessagesAsync(userID, socket);
         }
 
-        private async Task ReceiveMessagesAsync(string sender, WebSocket webSocket) {
+        public async Task SendMessageToReceiverAsync(Mensaje message)
+        {
+            if (_connectedUsers.TryGetValue(message.ReceiverId, out var receiverSocket) &&
+                receiverSocket.State == WebSocketState.Open)
+            {
+                var messageJson = System.Text.Json.JsonSerializer.Serialize(message);
+                var messageBytes = Encoding.UTF8.GetBytes(messageJson);
+                await receiverSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+            }
+        }
 
+        private async Task ReceiveMessagesAsync(string senderId, WebSocket webSocket)
+        {
             var buffer = new byte[1024 * 4];
             while (webSocket.State == WebSocketState.Open)
             {
                 var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    _connectedUsers.Remove(sender);
-                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Conexión cerrada", CancellationToken.None);
-                    return; 
+                    _connectedUsers.Remove(senderId);
+                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Conecion cerrada", CancellationToken.None);
                 }
-                    var messageJson = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    var message = System.Text.Json.JsonSerializer.Deserialize<Mensaje>(messageJson);
-
-                    if (_connectedUsers.TryGetValue(message.ReceiverId, out var receiverSocket) &&
-                        receiverSocket.State == WebSocketState.Open)
-                    {
-                        // Forward the message to the receiver
-                        var forwardMessage = Encoding.UTF8.GetBytes(messageJson);
-                        await receiverSocket.SendAsync(new ArraySegment<byte>(forwardMessage), WebSocketMessageType.Text, true, CancellationToken.None);
-                    }
-                    else
-                    {
-                        // Save the message to the database if the receiver is not online
-                        await _message.SaveMesaje(message);
-                    }
-                
             }
         }
+
     }
- }
+}
 

@@ -2,27 +2,39 @@
 using ChatAPI.Interfaces;
 using ChatAPI.Models;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Servers;
 
 namespace ChatAPI.Repositorio
 {
     public class MessageRepository : IMessagee
     {
-        private readonly MongoContext _mongoContext;
+        private readonly IMongoCollection<Mensaje> _messages;
 
         public MessageRepository(MongoContext mongoContext)
         {
-            _mongoContext = mongoContext;
+            _messages = mongoContext.Mensajes;
         }
 
-        public async Task<List<Mensaje>> GetMensajesAsync(string sender, string reciver)
+        public async Task<List<Mensaje>> GetMensajesAsync(string sender, string receiver)
         {
-            return await _mongoContext.Mensajes.Find( message => (message.SenderId == sender && message.ReceiverId == reciver)
-            || (message.SenderId == reciver && message.ReceiverId == sender)).ToListAsync();
+            var filter  = Builders<Mensaje>.Filter.And(
+            Builders<Mensaje>.Filter.Or(
+                    Builders<Mensaje>.Filter.Eq(m => m.SenderId, sender),
+                    Builders<Mensaje>.Filter.Eq(m => m.ReceiverId, sender)
+                ),
+                Builders<Mensaje>.Filter.Or(
+                    Builders<Mensaje>.Filter.Eq(m => m.SenderId, receiver),
+                    Builders<Mensaje>.Filter.Eq(m => m.ReceiverId, receiver)
+                )
+            );
+
+
+            return await _messages.Find(filter).ToListAsync();  
         }
 
         public async Task SaveMesaje(Mensaje mensaje)
         {
-            await _mongoContext.Mensajes.InsertOneAsync(mensaje);
+            await _messages.InsertOneAsync(mensaje);
         }
     }
 }
