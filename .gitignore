@@ -4,6 +4,8 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 **/appsettings.json
+# Ignorar el archivo appsettings.json en el proyecto ChatAPI
+ChatAPI/ChatAPI/appsettings.json
 
 
 # User-specific files
