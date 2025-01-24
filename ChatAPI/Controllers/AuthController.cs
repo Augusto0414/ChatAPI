@@ -24,7 +24,7 @@ namespace ChatAPI.Controllers
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto) {
-            var userExist = _usuario.GetByEmailAsync(dto.Email);
+            var userExist = await _usuario.GetByEmailAsync(dto.Email);
             if (userExist != null) {
                 return BadRequest("El usuario ya se encuentra registrado"); 
             }
