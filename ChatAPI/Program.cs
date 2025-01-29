@@ -13,6 +13,7 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
+
 // Add services to the container.
 
 builder.Services.AddControllers();
