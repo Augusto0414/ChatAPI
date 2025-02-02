@@ -48,9 +48,16 @@ namespace ChatAPI.Controllers
                 return BadRequest("Credenciales invalidas"); 
             }
 
-            var token = _authToken.GenerateJwtToken(user); 
+            var token = _authToken.GenerateJwtToken(user);
+            var userResponse = new
+            {
+                id = user.Id,
+                name = user.Name,
+                email = user.Email,
+                online = user.Online
+            };
 
-            return Ok(new { token }); 
+            return Ok(new { token, userResponse }); 
 
         }
     }

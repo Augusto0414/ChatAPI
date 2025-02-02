@@ -18,8 +18,9 @@ namespace ChatAPI.Service
 
         public string GenerateJwtToken(Usuario usuario)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var key = Convert.FromBase64String(_config["Jwt:Key"]);
+            var symmetricKey = new SymmetricSecurityKey(key);
+            var creds = new SigningCredentials(symmetricKey, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
                 claims: new[] { new Claim(ClaimTypes.Name, usuario.Name) },
