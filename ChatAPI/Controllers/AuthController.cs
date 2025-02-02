@@ -54,7 +54,6 @@ namespace ChatAPI.Controllers
                 id = user.Id,
                 name = user.Name,
                 email = user.Email,
-                online = user.Online
             };
 
             return Ok(new { token, userResponse }); 
