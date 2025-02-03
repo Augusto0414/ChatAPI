@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Org.BouncyCastle.Crypto.Generators;
 using BCrypt.Net;
+using System.Security.Claims;
 
 namespace ChatAPI.Controllers
 {
@@ -59,5 +60,44 @@ namespace ChatAPI.Controllers
             return Ok(new { token, userResponse }); 
 
         }
+
+        [HttpGet("revalidate")]
+        public IActionResult RevalidateToken()
+        {
+            try
+            {
+                var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return Unauthorized(new { ok = false, error = "Token no válido" });
+                }
+
+                var principal = _authToken.ValidateJwtToken(token);
+                if (principal == null)
+                {
+                    return Unauthorized(new { ok = false, error = "Token inválido o expirado" });
+                }
+
+                var name = principal.Identity.Name;
+                var uid = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                var newToken = _authToken.GenerateJwtToken(new Usuario { Name = name, Id = uid });
+
+                var usuario = new
+                {
+                    ok = true,
+                    uid,
+                    name,
+                    message = "Token renovado exitosamente"
+                }; 
+
+                return Ok(new { token = newToken, usuario });
+            }
+            catch
+            {
+                return StatusCode(500, new { ok = false, error = "Error al revalidar token" });
+            }
+        }
+
     }
 }

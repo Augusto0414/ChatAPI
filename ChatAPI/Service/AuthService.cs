@@ -22,12 +22,44 @@ namespace ChatAPI.Service
             var symmetricKey = new SymmetricSecurityKey(key);
             var creds = new SigningCredentials(symmetricKey, SecurityAlgorithms.HmacSha256);
 
+            var claims = new List<Claim>
+            {
+              new Claim(ClaimTypes.Name, usuario.Name), // Nombre del usuario
+              new Claim(ClaimTypes.NameIdentifier, usuario.Id) // UID del usuario
+            };
+
             var token = new JwtSecurityToken(
-                claims: new[] { new Claim(ClaimTypes.Name, usuario.Name) },
+                claims:  claims,
                 expires: DateTime.Now.AddDays(1),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        public ClaimsPrincipal? ValidateJwtToken(string token)
+        {
+            try
+            {
+                var key = Convert.FromBase64String(_config["Jwt:Key"]);
+                var symmetricKey = new SymmetricSecurityKey(key);
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = symmetricKey
+                };
+
+                var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
+                return principal;
+            }
+            catch
+            {
+                return null; // Token inválido o expirado
+            }
+        }
+
     }
 }
