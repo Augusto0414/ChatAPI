@@ -28,6 +28,20 @@ builder.Services.AddScoped<IMessagee, MessageRepository>();
 builder.Services.AddScoped<IUsuario, UserReposotory>();
 builder.Services.AddScoped<IAuth, AuthService>();
 
+
+// Configurar CORS para permitir TODO
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()   // Permitir cualquier origen
+                  .AllowAnyMethod()   // Permitir cualquier método (GET, POST, PUT, DELETE, etc.)
+                  .AllowAnyHeader();  // Permitir cualquier encabezado
+        });
+});
+
+
 // Inyección de servicios adicionales
 builder.Services.AddScoped<WebSocketService>();
 
@@ -58,6 +72,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
