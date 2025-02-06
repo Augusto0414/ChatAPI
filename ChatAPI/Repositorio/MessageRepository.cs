@@ -1,4 +1,5 @@
 ﻿using ChatAPI.Data;
+using ChatAPI.Dtos;
 using ChatAPI.Interfaces;
 using ChatAPI.Models;
 using MongoDB.Driver;
@@ -32,9 +33,16 @@ namespace ChatAPI.Repositorio
             return await _messages.Find(filter).ToListAsync();  
         }
 
-        public async Task SaveMesaje(Mensaje mensaje)
+        public async Task SaveMesaje(MessageDto mensaje)
         {
-            await _messages.InsertOneAsync(mensaje);
+            var mensajeModel = new Mensaje
+            {
+                SenderId = mensaje.SenderId,
+                ReceiverId = mensaje.ReceiverId,
+                Message = mensaje.Message,
+                FechaCreacion = mensaje.FechaCreacion
+            };
+            await _messages.InsertOneAsync(mensajeModel);
         }
     }
 }

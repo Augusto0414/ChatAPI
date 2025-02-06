@@ -1,4 +1,5 @@
-﻿using ChatAPI.Models;
+﻿using ChatAPI.Dtos;
+using ChatAPI.Models;
 
 namespace ChatAPI.Interfaces
 {
@@ -7,5 +8,7 @@ namespace ChatAPI.Interfaces
 
         Task<Usuario> GetByEmailAsync(string email);
         Task CreateUsuario(Usuario usuario);
+        Task<List<Usuario>> GetAllUserAsync();
+        Task<List<MensajeUsuarioDto>> GetAllUserLasMessage();
     }
 }

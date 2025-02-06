@@ -1,4 +1,5 @@
-﻿using ChatAPI.Interfaces;
+﻿using ChatAPI.Dtos;
+using ChatAPI.Interfaces;
 using ChatAPI.Models;
 using ChatAPI.Repositorio;
 using ChatAPI.Service;
@@ -11,7 +12,6 @@ namespace ChatAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize]
     public class ChatController : Controller
     {
         private readonly IMessagee _messagee;
@@ -33,12 +33,17 @@ namespace ChatAPI.Controllers
         }
 
         [HttpPost("send")]
-        public async Task<IActionResult> SendMessage([FromBody] Mensaje message)
+        public async Task<IActionResult> SendMessage([FromBody] MessageDto message)
         {
             message.FechaCreacion = DateTime.UtcNow;
             await _messagee.SaveMesaje(message);
             await _socketService.SendMessageToReceiverAsync(message);
-            return Ok();
+            var messaje = new {
+                message.ReceiverId, 
+                message.SenderId, 
+                message.Message
+            }; 
+            return Ok(new { resp =  "Ok", messaje });
         }
     }
 }

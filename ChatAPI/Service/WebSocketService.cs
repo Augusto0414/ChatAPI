@@ -1,4 +1,5 @@
-﻿using ChatAPI.Interfaces;
+﻿using ChatAPI.Dtos;
+using ChatAPI.Interfaces;
 using ChatAPI.Models;
 using System.Net.WebSockets;
 using System.Security.Claims;
@@ -27,7 +28,7 @@ namespace ChatAPI.Service
             }
         }
 
-        public async Task SendMessageToReceiverAsync(Mensaje message)
+        public async Task SendMessageToReceiverAsync(MessageDto message)
         {
             if (_connectedUsers.TryGetValue(message.ReceiverId, out var receiverSocket) &&
                 receiverSocket.State == WebSocketState.Open)
